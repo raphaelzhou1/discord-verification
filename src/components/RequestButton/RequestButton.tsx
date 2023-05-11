@@ -1,9 +1,10 @@
-import { useMemo, useRef, useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useRecoilState } from 'recoil'
 import { toast } from 'react-toastify'
 import { useWallet } from '@sei-js/react'
-import ReCAPTCHA from 'react-google-recaptcha'
 import {
   Button,
+  Text,
   CircularProgress,
   Stack
 } from '@mui/material'
@@ -11,10 +12,12 @@ import { useMutation } from 'react-query'
 import { AccountData } from '@cosmjs/proto-signing'
 import axios from 'axios'
 import { useRefetchQueries } from "@sparrowswap/hooks/useRefetchQueries";
+import { useChainInfo} from "@sparrowswap/hooks";
+import { SeiSigningCosmWasmClient, WalletWindowKey } from '@sei-js/core'
+import { useRouter } from 'next/router'
 
 type RequestFaucetArgs = {
   account: AccountData
-  token: string
 }
 
 const sleep = (delayMs: number) =>
@@ -25,68 +28,107 @@ function getRandomInt(max: number) {
 }
 
 const RequestButton = () => {
-	const { accounts } = useWallet();
-	const walletAccount = useMemo(() => accounts?.[0], [accounts]);
-  const recaptchaRef = useRef<ReCAPTCHA>(null)
-  const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null)
-  const refetchBalances = useRefetchQueries(['balances'], 1500)
+  const [chainInfo] = useChainInfo()
+  const [modalOpen, setModalOpen] = useState(false);
 
-  const { mutate: requestFaucet, isLoading } = useMutation(
-    async (args: RequestFaucetArgs) => {
-      if (process.env.NEXT_PUBLIC_ENABLED !== 'true') {
-        throw new Error('Faucet is not available at the moment. Please swap for USDC on SparrowSwap. https://sparrowswap.xyz/')
+  const router = useRouter()
+  const user_id = router.query.user_id
+
+  const checkNFT = async () => {
+
+    if (!window.keplr) {
+      alert("Please install keplr extension");
+      return;
+    }
+
+    console.log("Checking NFT presence")
+
+    // Get Keplr offlineSigner
+    const offlineSigner = window.keplr.getOfflineSigner(chainInfo.chainId);
+
+    // Get the accounts associated with the offlineSigner
+    // const accounts = await offlineSigner.getAccounts();
+
+    // Assuming you want to use the first account
+    // const signerAddress = accounts[0].address;
+    const key = await window.keplr.getKey(chainInfo.chainId)
+
+    console.log("Key: ", key)
+
+    const collections =[
+      {
+        "id": "ogapril2023",
+        "name": "Sparrowswap OG April 2023",
+        "address": "sei1mn73rzt8yla2qc3vg65jvfan84axwzynepnleukt69yxrqgehwss09x7hl"
       }
+    ]
+    const msg = {
+      tokens: {
+        owner: key.bech32Address
+      },
+    }
 
-      await sleep(10000 + getRandomInt(30000))
-      const { data: response } = await axios.get('/api/faucet', {params: {
-          dest: args.account.address,
-          token: args.token
-      }})
-      console.log(response.data)
-    },
-    {
-      onSuccess: () => {
-        console.log('success')
-        toast.success('Faucet request successful!')
-      },
-      onError: (error) => {
-        console.log(error)
-        toast.error((error as any)?.message ?? error?.toString())
-      },
-      onSettled: () => {
-        recaptchaRef.current?.reset()
-        setRecaptchaToken(null)
-        refetchBalances()
+    const client = await SeiSigningCosmWasmClient.connectWithSigner(
+      chainInfo.rpc,
+      offlineSigner,
+    )
+
+    console.log("OfflineSigner: ", offlineSigner)
+    console.log("Using address: ", key.bech32Address)
+    console.log("On collection adddress: ", collections[0].address)
+    console.log("With msg ", msg)
+    const tokenIDs = await client.queryContractSmart(collections[0].address, msg)
+
+    if (tokenIDs == null) {
+      setModalOpen(true);
+    } else {
+      try {
+
+        console.log("Sending request to server: ", {
+          address: key.bech32Address,
+          user_id: user_id,
+          exists: true,
+        })
+        const response = await axios.post('http://localhost:8090/role_assign_upon_nft', {
+          address: key.bech32Address,
+          user_id: user_id,
+          exists: true,
+        });
+        // Check the response if needed
+        console.log(response.data);
+      } catch (error) {
+        console.error(error);
       }
     }
-  )
+  };
 
-  if (!process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY) {
-    throw new Error('Missing NEXT_PUBLIC_RECAPTCHA_SITE_KEY env variable')
-  }
 
-	return (
-    <Stack spacing={2}>
-      <ReCAPTCHA
-        sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}
-        size='normal'
-        onChange={setRecaptchaToken}
-        ref={recaptchaRef}
-      />
+  return (
+    <>
       <Button
-        disabled={isLoading || !walletAccount || !recaptchaToken}
+        disabled={false}
         color='primary'
         variant='contained'
         size='large'
-        startIcon = {
-          isLoading ? <CircularProgress color="inherit" size={25} /> : null
-        }
-        onClick={() => requestFaucet({account: walletAccount, token: recaptchaToken ?? ''})}
+        onClick={() => checkNFT()}
       >
         Request
       </Button>
-    </Stack>
-	);
+      {modalOpen && (
+        <Dialog
+          open={modalOpen}
+          onClose={() => setModalOpen(false)}
+        >
+          <DialogTitle>NFT Not Found</DialogTitle>
+          <DialogContent>
+            <DialogContentText>
+              NFT is not found, please contact Discord admin.
+            </DialogContentText>
+          </DialogContent>
+        </Dialog>
+      )}
+    </>
+  );
 };
 
 export default RequestButton;

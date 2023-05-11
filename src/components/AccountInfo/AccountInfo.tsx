@@ -88,10 +88,6 @@ const AccountInfo = () => {
 					{walletAccount?.address || 'No account found!'}
           {walletAccount?.address && <IoCopySharp className={styles.copy} onClick={onClickCopy} />}
 				</Stack>
-        <h3>Balance</h3>
-				<Stack divider={<Divider flexItem />} spacing={2}>
-          {renderBalances()}
-        </Stack>
       </CardContent>
 		</Card>
 	);

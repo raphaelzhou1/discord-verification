@@ -14,8 +14,7 @@ const Faucet = () => {
     <SeiWalletProvider chainConfiguration={selectedChainConfigUrls}>
       <Container maxWidth='sm'>
         <div>
-          <h1>USDC Faucet</h1>
-          <p>Receive 100 USDC on Sei&rsquo;s <Box component='span' sx={{ fontFamily: 'Monospace' }}>atlantic-2</Box> testnet.</p>
+          <h1>Wallet Verification to Get Roles</h1>
         </div>
         <div>
           <Stack spacing={2}>
