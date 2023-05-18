@@ -14,7 +14,8 @@ const Faucet = () => {
     <SeiWalletProvider chainConfiguration={selectedChainConfigUrls}>
       <Container maxWidth='sm'>
         <div>
-          <h1>Wallet Verification to Get Roles</h1>
+          <h1>Ahoy, me seilor! </h1>
+          <h2>Upon Captain Autopirate's request, I'm here to verify yer wallet to proffer Discord roles</h2>
         </div>
         <div>
           <Stack spacing={2}>
