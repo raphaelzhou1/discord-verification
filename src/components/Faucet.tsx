@@ -15,7 +15,7 @@ const Faucet = () => {
       <Container maxWidth='sm'>
         <div>
           <h1>Ahoy, me seilor! </h1>
-          <h2>Upon Captain Autopirate's request, I'm here to verify yer wallet to proffer Discord roles</h2>
+          <h2> 🏴‍☠️ At the behest of Captain Autopirate, I'm here to scrutinize yer treasure chest and bestow upon ye the rightful Discord ranks, matey! 🏴‍☠️</h2>
         </div>
         <div>
           <Stack spacing={2}>
