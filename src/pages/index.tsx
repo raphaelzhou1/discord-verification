@@ -14,7 +14,7 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>Captain Autopirate's Verifier</title>
+        <title>Captain Autopirate&apos;s Verifier</title>
         <meta name="description" content="USDC Faucet for Sei atlantic-2" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />

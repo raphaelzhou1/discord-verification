@@ -5,10 +5,10 @@ import { useQueryClient, useWallet } from '@sei-js/react';
 
 import { BalanceResponseType } from '@sparrowswap/types';
 import {convertMicroDenomToDenom, formatTokenBalance} from '@sparrowswap/util'
-import { useRefetchQueries } from '@sparrowswap/hooks/useRefetchQueries';
 import styles from './styles.module.css'
 import {Card, CardContent, CircularProgress, Divider, Stack} from '@mui/material'
 import {useQuery} from "react-query";
+import {useRefetchQueries} from "@sparrowswap/hooks";
 
 const AccountInfo = () => {
 	const { offlineSigner, accounts } = useWallet();

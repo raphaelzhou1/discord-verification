@@ -78,14 +78,14 @@ const RequestButton = () => {
 
   const checkNFTLeap = async () => {
     try {
-      if (!window.leap) {
+      if (!window.keplr || !window.leap) {
         console.log("Please install Leap");
         alert("Please install leap extension");
         return;
       }
 
-      // Get Keplr offlineSigner
-      const offlineSigner = await window.leap.getOfflineSigner("atlantic-2");
+      // Get offlineSigner
+      const offlineSigner = await window.keplr.getOfflineSigner("atlantic-2");
       console.log("Offlinesigner: ", offlineSigner)
       const account = (await offlineSigner.getAccounts())[0]
       const signDoc = {
@@ -163,7 +163,7 @@ const RequestButton = () => {
         >
           <DialogContent>
             <DialogContentText>
-              Arr, there's a hitch in Captain Autopirate's sea charts, seek counsel from yer crew on Discord or hail the Discord harbor master! 🏴‍☠️
+              Arr, there&apos;s a hitch in Captain Autopirate&apos;s sea charts, seek counsel from yer crew on Discord or hail the Discord harbor master! 🏴‍☠️
             </DialogContentText>
           </DialogContent>
         </Dialog>
